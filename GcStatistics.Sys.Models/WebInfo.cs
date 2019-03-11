@@ -46,7 +46,7 @@ namespace GcStatistics.Sys.Models
         /// <summary>
         /// 外键(用户表)
         /// </summary>
-        public virtual ICollection<UserInfo> UserInfo { get; set; }
-        public virtual VisitorInfo VisitorInfo { get; set; }
+        public virtual UserInfo UserInfo { get; set; }
+        public virtual ICollection<VisitorInfo> VisitorInfo { get; set; }
     }
 }

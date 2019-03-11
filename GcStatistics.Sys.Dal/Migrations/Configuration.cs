@@ -10,7 +10,6 @@ namespace GcStatistics.Sys.Dal.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
-            AutomaticMigrationDataLossAllowed = true;
             ContextKey = "GcStatistics.Sys.Dal.GcSiteDb";
         }
 

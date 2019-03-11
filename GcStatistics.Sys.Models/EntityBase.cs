@@ -9,7 +9,6 @@ namespace GcStatistics.Sys.Models
 {
     public class EntityBase
     {
-        [Key]
         public int Id { get; set; }
     }
 }

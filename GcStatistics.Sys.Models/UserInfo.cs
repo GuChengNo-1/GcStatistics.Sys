@@ -10,7 +10,7 @@ namespace GcStatistics.Sys.Models
     {
         public string UserName { get; set; }
         public string UserPwd { get; set; }
-        public int UserPhone { get; set; }
-        public virtual WebInfo WebInfo { get; set; }
+        public string UserPhone { get; set; }
+        public virtual ICollection<WebInfo> WebInfo { get; set; }
     }
 }
