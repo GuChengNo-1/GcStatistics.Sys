@@ -53,6 +53,7 @@
     <Compile Include="GcSiteDb.cs" />
     <Compile Include="GenericRepository.cs" />
     <Compile Include="IRepository.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkOfUnit.cs" />
   </ItemGroup>

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using GcStatistics.Sys.Dal;
+using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
@@ -15,6 +17,10 @@ namespace GcStatistics.Sys
         {
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            //删除数据库重新创建数据库
+            //Database.SetInitializer(new DropCreateDatabaseIfModelChanges<GcSiteDb>());
+            //当models发生改变时修改数据库
+            //Database.SetInitializer(new MigrateDatabaseToLatestVersion<GcSiteDb, Configuration>());
         }
     }
 }

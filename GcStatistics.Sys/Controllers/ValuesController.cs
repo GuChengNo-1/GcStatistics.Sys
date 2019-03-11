@@ -25,6 +25,8 @@ namespace GcStatistics.Sys.Controllers
         // GET api/values/5
         public string Get(string key)
         {
+            GcSiteDb db = new GcSiteDb();
+            db.Database.CreateIfNotExists();
             IPAddress[] ip = null;
             string url = System.Web.HttpContext.Current.Request.Url.Host.ToString();
             if (key == "E10ADC3949BA59ABBE56E057F20F883E")
