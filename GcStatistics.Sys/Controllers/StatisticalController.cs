@@ -16,7 +16,22 @@ namespace GcStatistics.Sys.Controllers
     public class StatisticalController : ApiController
     {
         WorkOfUnit work = new WorkOfUnit();
-        GcSiteDb db = new GcSiteDb();
+        public void Get(string key)
+        {
+            WebInfo web = new WebInfo();
+            if (work.CreateRepository<WebInfo>().GetList(m => m.WebKey == key).Count() > 0)
+            {
+                web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);
+                web.WebPv = web.WebPv + 1;
+                
+            }
+            VisitorInfo vist = new VisitorInfo();
+            vist.AccessTime = DateTime.Now.Date;
+            vist.VisitPage = System.Web.HttpContext.Current.Request.Url.AbsoluteUri.ToString();
+            vist.IpAddress = "";
+            vist.VisitSE = "";
+            vist.WebInfo = web;
+        }
         public void Put(string key)
         {
             //string strPath = "http://" + Request.ServerVariables["HTTP_HOST"] + Request.ServerVariables["PATH_INFO"] + "?" + Request.ServerVariables["QUERY_STRING"];

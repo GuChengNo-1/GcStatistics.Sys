@@ -20,7 +20,7 @@ namespace GcStatistics.Sys
             //删除数据库重新创建数据库
             //Database.SetInitializer(new DropCreateDatabaseIfModelChanges<GcSiteDb>());
             //当models发生改变时修改数据库
-            //Database.SetInitializer(new MigrateDatabaseToLatestVersion<GcSiteDb, Configuration>());
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<GcSiteDb, GcStatistics.Sys.Dal.Migrations.Configuration>());
         }
     }
 }

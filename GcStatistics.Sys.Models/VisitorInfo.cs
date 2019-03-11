@@ -42,6 +42,6 @@ namespace GcStatistics.Sys.Models
         /// <summary>
         /// 外键(网站流量表)
         /// </summary>
-        public virtual ICollection<WebInfo> WebInfo { get; set; }
+        public virtual WebInfo WebInfo { get; set; }
     }
 }
