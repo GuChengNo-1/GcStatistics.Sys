@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <button id="btn">btn</button>
+    <script src="Scripts/jquery-1.10.2.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            jQuery.support.cors = true;
+            $('#btn').click(function () {
+                $.ajax({
+                    url: 'http://localhost:58392/api/values?key=E10ADC3949BA59ABBE56E057F20F883E',
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (data) {
+                        alert(data);
+                        console.log(data);
+                    }
+                })
+            })
+        })
+    </script>
+</body>
+</html>

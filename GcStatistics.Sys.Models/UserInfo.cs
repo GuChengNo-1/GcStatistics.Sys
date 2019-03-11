@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GcStatistics.Sys.Models
+{
+    public class UserInfo:EntityBase
+    {
+        public string UserName { get; set; }
+        public string UserPwd { get; set; }
+        public int UserPhone { get; set; }
+        public virtual WebInfo WebInfo { get; set; }
+    }
+}
