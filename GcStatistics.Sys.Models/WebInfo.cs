@@ -22,15 +22,15 @@ namespace GcStatistics.Sys.Models
         /// <summary>
         /// pv
         /// </summary>
-        public string WebPv { get; set; }
+        public int WebPv { get; set; }
         /// <summary>
         /// uv
         /// </summary>
-        public string WebUv { get; set; }
+        public int WebUv { get; set; }
         /// <summary>
         /// ip数
         /// </summary>
-        public string IpCount { get; set; }
+        public int IpCount { get; set; }
         /// <summary>
         /// 跳出率
         /// </summary>
