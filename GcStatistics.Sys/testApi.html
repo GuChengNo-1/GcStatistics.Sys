@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <button id="btn">btn</button>
+    <button id="btn">测试0.1.1</button>
     <script src="Scripts/jquery-1.10.2.js"></script>
     <script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
     <script type="text/javascript">
@@ -18,19 +18,20 @@
         //IP、IP地址
         console.log(url, domain, returnCitySN["cip"], returnCitySN["cname"]);
         $(function () {
+            //, VisitPage: window.location.href
+            var formdata = { key: "3b9851aa307bb5374fcff13013ee0240", VisitPage: window.location.href, IpAddress: returnCitySN['cip'], Address: returnCitySN['cname'] };
             jQuery.support.cors = true;
-            $('#btn').click(function () {
                 $.ajax({
-                    url: 'http://localhost:58392/api/Statistical?key=3b9851aa307bb5374fcff13013ee0240',
+                    url: 'http://localhost:58392/api/Statistical',
                     type: 'get',
+                    data: formdata,
                     dataType: 'json',
                     success: function (data) {
                         alert(data);
-                        console.log(data);
+                        console.log(data.AccessTime);
                     }
-                });
-            });
-        });
+                })
+        })
     </script>
 </body>
 </html>
