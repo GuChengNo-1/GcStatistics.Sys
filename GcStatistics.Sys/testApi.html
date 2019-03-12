@@ -9,7 +9,14 @@
 <body>
     <button id="btn">btn</button>
     <script src="Scripts/jquery-1.10.2.js"></script>
+    <script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
     <script type="text/javascript">
+        //URL
+        var url = document.URL;
+        //域名
+        var domain = window.location.host;
+        //IP、IP地址
+        console.log(url, domain, returnCitySN["cip"], returnCitySN["cname"]);
         $(function () {
             jQuery.support.cors = true;
             $('#btn').click(function () {
@@ -21,9 +28,9 @@
                         alert(data);
                         console.log(data);
                     }
-                })
-            })
-        })
+                });
+            });
+        });
     </script>
 </body>
 </html>
