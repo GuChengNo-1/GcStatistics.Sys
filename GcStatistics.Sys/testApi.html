@@ -11,18 +11,19 @@
     <script src="Scripts/jquery-1.10.2.js"></script>
     <script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
     <script type="text/javascript">
-        //URL
-        var url = document.URL;
-        //域名
-        var domain = window.location.host;
-        //IP、IP地址
-        console.log(url, domain, returnCitySN["cip"], returnCitySN["cname"]);
+        ////URL
+        //var url = document.URL;
+        ////域名
+        //var domain = window.location.host;
+        ////IP、IP地址
+        //console.log(url, domain, returnCitySN["cip"], returnCitySN["cname"]);
         $(function () {
             //, VisitPage: window.location.href
             var formdata = { key: "3b9851aa307bb5374fcff13013ee0240", VisitPage: window.location.href, IpAddress: returnCitySN['cip'], Address: returnCitySN['cname'] };
-            jQuery.support.cors = true;
+            $("#btn").click(function () {
+                jQuery.support.cors = true;
                 $.ajax({
-                    url: 'http://localhost:58392/api/Statistical',
+                    url: 'http://localhost:58393/api/Statistical',
                     type: 'get',
                     data: formdata,
                     dataType: 'json',
@@ -31,7 +32,8 @@
                         console.log(data.AccessTime);
                     }
                 })
-        })
+            });
+        });
     </script>
 </body>
 </html>

@@ -18,8 +18,9 @@ namespace GcStatistics.Sys.Controllers
     {
         WorkOfUnit work = new WorkOfUnit();
         private static string IsPostUrl = string.Empty;
-        public IEnumerable<object> Get(string key,string VisitPage, string IpAddress, string Address)
-         {
+        GcSiteDb db = new GcSiteDb();
+        public IEnumerable<object> Get(string key, string VisitPage, string IpAddress, string Address)
+        {
             WebInfo web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);
             if (web != null)
             {
@@ -50,6 +51,24 @@ namespace GcStatistics.Sys.Controllers
                 vist.Address = Address;
                 vist.Age = 0;
                 vist.AccessEndTime = DateTime.Now;
+
+                //随机生成标识码(identification code) 32位字符
+                string IC = Guid.NewGuid().ToString("N");
+                var bo = work.CreateRepository<VisitorInfo>().GetList(
+                    m => m.IC == IC);
+                if (bo.Count() > 0)
+                {
+                    IC = Guid.NewGuid().ToString("N");
+                }
+                vist.IC = IC;
+                //bool bo=work.CreateRepository<VisitorInfo>().
+                //vist.IC = IC;
+                //Session传递开始时间  AccessTime
+                DateTime AccessTime = vist.AccessTime;
+                //string aa = HttpContext.Current.Session["AccessTime"].ToString();
+                //HttpContext.Current.Session["Id"] = vist.Id;
+                //work.CreateRepository<VisitorInfo>().Update(vist,AccessTime.ToString());
+                //var time = work.CreateRepository<VisitorInfo>().GetList(m => m.AccessTime == AccessTime); ;
                 //判断用户是否访问一个就退出
                 if (IsPostUrl == string.Empty)
                 {
@@ -62,12 +81,18 @@ namespace GcStatistics.Sys.Controllers
                 var alikeCount = work.CreateRepository<VisitorInfo>().GetList(
                     m => m.IpAddress == vist.IpAddress && m.VisitPage == vist.VisitPage
                     );
+                work.CreateRepository<VisitorInfo>().Insert(vist);
+                work.Save();
                 //判断用户是否相同用户
                 if (!(alikeCount.Count() > 0))
                 {
-                    work.CreateRepository<VisitorInfo>().Insert(vist);
-                    work.Save();
+
                 }
+
+                #region
+                //1012683c666a4b1ebecf7fb6a2d78ace
+                //41de0d391fb34bb3938c795476f1ee87
+                #endregion
 
                 #endregion
                 web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);//获取pv
@@ -88,10 +113,33 @@ namespace GcStatistics.Sys.Controllers
                     }
                 }
                 web.IpCount = webuv.Count;//获取ip数 去重
+
                 work.CreateRepository<WebInfo>().Update(web);
+
+                List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
+                var model = list.Where(p => p.AccessTime == AccessTime).FirstOrDefault();
+                int id = model.Id;
+                HttpContext.Current.Session["id"] = id;
+
+
+
+                //model.AccessEndTime = DateTime.Now;
+                //string dateDiff = null;
+                //TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
+                //TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
+                //TimeSpan ts = ts1.Subtract(ts2).Duration();
+                //model.Duration = Double.Parse(ts.Seconds.ToString());
+                //work.CreateRepository<VisitorInfo>().Update(model);
+
+                //int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
+
+                ////sum = list.Sum(a => a.Id);
+                //double duration = work.CreateRepository<VisitorInfo>().GetCount();
+                //duration = list.Sum(a => a.Duration);
+
+                //double sc = duration / sum;
+
                 work.Save();
-                //HttpContext.Current.Session["PageNumber"] = 0;
-                //var n = HttpContext.Current.Session["PageNumber"].ToString();
             }
             else
             {

@@ -10,5 +10,10 @@ namespace GcStatistics.Sys.Models
     public class EntityBase
     {
         public int Id { get; set; }
+        ///// <summary>
+        ///// 随机标识
+        ///// </summary>
+        //[Key]
+        //public string IC { get; set; }
     }
 }

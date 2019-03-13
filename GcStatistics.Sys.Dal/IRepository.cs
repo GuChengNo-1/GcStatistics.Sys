@@ -14,12 +14,12 @@ namespace GcStatistics.Sys.Dal
         /// <summary>
         /// 添加
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="entity">model</param>
         void Insert(TEntity entity);
         /// <summary>
         /// 修改
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="entity">model</param>
         /// <param name="excludeFields"></param>
         void Update(TEntity entity, params string[] excludeFields);
         /// <summary>
@@ -30,7 +30,7 @@ namespace GcStatistics.Sys.Dal
         /// <summary>
         /// 根据实体删除
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="entity">model</param>
         void Delete(TEntity entity);
 
         TEntity GetEntityById(object id);

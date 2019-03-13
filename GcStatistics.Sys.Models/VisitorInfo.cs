@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,9 +41,18 @@ namespace GcStatistics.Sys.Models
         /// </summary>
         public DateTime AccessEndTime { get; set; }
         /// <summary>
+        /// 时长
+        /// </summary>
+        public Double Duration { get; set; }
+        /// <summary>
         /// (0 or 1)用户是否只访问了一个页面
         /// </summary>
         public int PageNumber { get; set; }
+        /// <summary>
+        /// IC 随机生成标识
+        /// </summary>
+        //[Key]
+        public string IC { get; set; }
         /// <summary>
         /// 外键(网站流量表)
         /// </summary>
