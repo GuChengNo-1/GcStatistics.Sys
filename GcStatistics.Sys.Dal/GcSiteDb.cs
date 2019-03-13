@@ -12,7 +12,7 @@ namespace GcStatistics.Sys.Dal
     {
         public GcSiteDb()
             :base("connStr")
-         {
+        {
 
         }
         public IDbSet<UserInfo> UserInfo { get; set; }

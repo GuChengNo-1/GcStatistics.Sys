@@ -42,9 +42,11 @@ namespace GcStatistics.Sys.Controllers
                 if (se.Contains("MetaSr")) { se = "搜狗"; }
                 //Maxthon浏览器（傲游）
                 if (se.Contains("Maxthon")) { se = "傲游"; }
+                //因特网浏览器
+                else { se = "IE"; }
                 VisitorInfo vist = new VisitorInfo();
                 vist.AccessTime = DateTime.Now;
-                vist.VisitPage = VisitPage; //System.Web.HttpContext.Current.Request.UrlReferrer.ToString()
+                vist.VisitPage = VisitPage;
                 vist.IpAddress = IpAddress;
                 vist.VisitSE = se;
                 vist.WebInfo = web;
@@ -78,13 +80,11 @@ namespace GcStatistics.Sys.Controllers
                 {
                     vist.PageNumber = 1;
                 }
-                var alikeCount = work.CreateRepository<VisitorInfo>().GetList(
-                    m => m.IpAddress == vist.IpAddress && m.VisitPage == vist.VisitPage
-                    );
-                work.CreateRepository<VisitorInfo>().Insert(vist);
-                work.Save();
-                //判断用户是否相同用户
-                if (!(alikeCount.Count() > 0))
+                List<VisitorInfo> alikeCount = work.CreateRepository<VisitorInfo>().GetList(
+                    m => m.IpAddress == vist.IpAddress
+                    ).ToList();
+                //通过ip地址保证访客数计算
+                if (alikeCount == null)
                 {
 
                 }
@@ -99,8 +99,8 @@ namespace GcStatistics.Sys.Controllers
                 web.WebPv = web.WebPv + 1;
                 web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
                 int rate = work.CreateRepository<VisitorInfo>().GetCount(m => m.PageNumber == 0);
-                decimal result = Math.Round((decimal)rate / web.WebPv, 4);
-                web.BounceRate = result.ToString();
+                decimal rateResult = Math.Round((decimal)rate / web.WebPv, 4);
+                web.BounceRate = (rateResult * 100).ToString().Length >= 5 ? (rateResult * 100).ToString().Substring(0, 5) + "%" : (rateResult * 100).ToString() + "%";
                 List<VisitorInfo> webuv = work.CreateRepository<VisitorInfo>().GetList().ToList();//获取uv
                 for (int i = 0; i < webuv.Count(); i++)
                 {
@@ -141,11 +141,6 @@ namespace GcStatistics.Sys.Controllers
 
                 work.Save();
             }
-            else
-            {
-
-            }
-
             return new object[] { "持行成功" };
         }
 
@@ -160,5 +155,6 @@ namespace GcStatistics.Sys.Controllers
         {
 
         }
+
     }
 }
