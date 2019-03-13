@@ -42,11 +42,9 @@ namespace GcStatistics.Sys.Controllers
                 if (se.Contains("MetaSr")) { se = "搜狗"; }
                 //Maxthon浏览器（傲游）
                 if (se.Contains("Maxthon")) { se = "傲游"; }
-                //因特网浏览器
-                else { se = "IE"; }
                 VisitorInfo vist = new VisitorInfo();
                 vist.AccessTime = DateTime.Now;
-                vist.VisitPage = VisitPage;
+                vist.VisitPage = VisitPage; //System.Web.HttpContext.Current.Request.UrlReferrer.ToString()
                 vist.IpAddress = IpAddress;
                 vist.VisitSE = se;
                 vist.WebInfo = web;
@@ -80,11 +78,13 @@ namespace GcStatistics.Sys.Controllers
                 {
                     vist.PageNumber = 1;
                 }
-                List<VisitorInfo> alikeCount = work.CreateRepository<VisitorInfo>().GetList(
-                    m => m.IpAddress == vist.IpAddress
-                    ).ToList();
-                //通过ip地址保证访客数计算
-                if (alikeCount == null)
+                var alikeCount = work.CreateRepository<VisitorInfo>().GetList(
+                    m => m.IpAddress == vist.IpAddress && m.VisitPage == vist.VisitPage
+                    );
+                work.CreateRepository<VisitorInfo>().Insert(vist);
+                work.Save();
+                //判断用户是否相同用户
+                if (!(alikeCount.Count() > 0))
                 {
 
                 }
@@ -99,8 +99,8 @@ namespace GcStatistics.Sys.Controllers
                 web.WebPv = web.WebPv + 1;
                 web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
                 int rate = work.CreateRepository<VisitorInfo>().GetCount(m => m.PageNumber == 0);
-                decimal rateResult = Math.Round((decimal)rate / web.WebPv, 4);
-                web.BounceRate = (rateResult * 100).ToString().Length >= 5 ? (rateResult * 100).ToString().Substring(0, 5) + "%" : (rateResult * 100).ToString() + "%";
+                decimal result = Math.Round((decimal)rate / web.WebPv, 4);
+                web.BounceRate = result.ToString();
                 List<VisitorInfo> webuv = work.CreateRepository<VisitorInfo>().GetList().ToList();//获取uv
                 for (int i = 0; i < webuv.Count(); i++)
                 {
@@ -116,31 +116,26 @@ namespace GcStatistics.Sys.Controllers
 
                 work.CreateRepository<WebInfo>().Update(web);
 
+                work.Save();
                 List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
                 var model = list.Where(p => p.AccessTime == AccessTime).FirstOrDefault();
                 int id = model.Id;
+
+                string dateDiff = null;
+                TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
+                TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
+                TimeSpan ts = ts1.Subtract(ts2).Duration();
+                dateDiff = ts.Hours.ToString() + ":" + ts.Minutes.ToString() + ":" + ts.Seconds.ToString();
+
+                double sc =double.Parse(dateDiff) / 5;
+
                 HttpContext.Current.Session["id"] = id;
-
-
-
-                //model.AccessEndTime = DateTime.Now;
-                //string dateDiff = null;
-                //TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
-                //TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
-                //TimeSpan ts = ts1.Subtract(ts2).Duration();
-                //model.Duration = Double.Parse(ts.Seconds.ToString());
-                //work.CreateRepository<VisitorInfo>().Update(model);
-
-                //int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
-
-                ////sum = list.Sum(a => a.Id);
-                //double duration = work.CreateRepository<VisitorInfo>().GetCount();
-                //duration = list.Sum(a => a.Duration);
-
-                //double sc = duration / sum;
-
-                work.Save();
             }
+            else
+            {
+
+            }
+
             return new object[] { "持行成功" };
         }
 
@@ -155,6 +150,5 @@ namespace GcStatistics.Sys.Controllers
         {
 
         }
-
     }
 }
