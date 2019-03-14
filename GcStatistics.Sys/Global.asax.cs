@@ -15,7 +15,7 @@ using System.Web.SessionState;
 
 namespace GcStatistics.Sys
 {
-    public class WebApiApplication : System.Web.HttpApplication
+    public class WebApiApplication : System.Web.HttpApplication, System.Web.SessionState.IRequiresSessionState
     {
         WorkOfUnit work = new WorkOfUnit();
         GcSiteDb db = new GcSiteDb();
@@ -62,7 +62,12 @@ namespace GcStatistics.Sys
         {
             DateTime startTime, endTime;
             //接受后台传递的Id
-            var id = HttpContext.Current.Session["id"];
+            var id = 0;
+            id = int.Parse(Session["id"].ToString());
+
+            //id = int.Parse(HttpContext.Current.Session["id"].ToString());
+
+
             List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
             var model = list.Where(p => p.Id == int.Parse(id.ToString())).FirstOrDefault();
             int vid = 0;
@@ -83,17 +88,10 @@ namespace GcStatistics.Sys
             duration = list.Sum(a => a.Duration);
             //平均时长
             //double sc = duration / sum;
-            //WebPv.WebTS = duration / sum;
+            //WebPv.WebTS = d         uration / sum;
 
             work.CreateRepository<VisitorInfo>().Update(model);
             work.Save();
-
-
-
-            //int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
-            //sum = list.Sum(a=>a.Id);
-            //double duration = work.CreateRepository<VisitorInfo>().GetCount();
-            //duration = list.Sum(a=>a.Duration);
         }
     }
 }

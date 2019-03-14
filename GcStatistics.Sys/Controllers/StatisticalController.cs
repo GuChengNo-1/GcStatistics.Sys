@@ -43,7 +43,7 @@ namespace GcStatistics.Sys.Controllers
                 //Maxthon浏览器（傲游）
                 if (se.Contains("Maxthon")) { se = "傲游"; }
                 //因特网浏览器
-                else { se = "IE"; }
+                //else { se = "IE"; }
                 VisitorInfo vist = new VisitorInfo();
                 vist.AccessTime = DateTime.Now;
                 vist.VisitPage = VisitPage;
@@ -72,38 +72,34 @@ namespace GcStatistics.Sys.Controllers
                 }
                 vist.IC = IC;
 
-                //Session传递开始时间  AccessTime
-                //DateTime AccessTime = vist.AccessTime;
-                //string aa = HttpContext.Current.Session["AccessTime"].ToString();
-                //HttpContext.Current.Session["Id"] = vist.Id;
-                //work.CreateRepository<VisitorInfo>().Update(vist,AccessTime.ToString());
-                //var time = work.CreateRepository<VisitorInfo>().GetList(m => m.AccessTime == AccessTime); 
-
-                var alikeCount = work.CreateRepository<VisitorInfo>().GetList(
-                    m => m.IpAddress == vist.IpAddress && m.VisitPage == vist.VisitPage
-                    );
-                work.CreateRepository<VisitorInfo>().Insert(vist);
-                work.Save();
                 //判断用户是否相同用户
-                if (!(alikeCount.Count() > 0))
+                List<VisitorInfo> alikeCount = work.CreateRepository<VisitorInfo>().GetList(
+                 m => m.IpAddress == vist.IpAddress
+                 ).ToList();
+                //通过ip地址保证访客数计算
+                if (alikeCount.Count() == 0)
+                {
+                    work.CreateRepository<VisitorInfo>().Insert(vist);
+                    work.Save();
+                }
+                foreach (var item in alikeCount)
                 {
                     TimeSpan span = DateTime.Now - item.AccessTime;
                     //判断该ip地址访客访问时间是否超过24小时
                     int temp = Convert.ToInt32(span.TotalHours);
                     if (temp >= 24 && item.Lock == 0)
                     {
-                        string sql = "update VisitorInfoes set ";
                         item.Lock = 1;
                         work.CreateRepository<VisitorInfo>().Update(item);
                         work.Save();
-                        //item.PageNumber = 0;
                         work.CreateRepository<VisitorInfo>().Insert(vist);
-                        //work.ExecuteNonQuery(sql);
                         work.Save();
                     }
                 }
-                
+
+
                 #endregion
+
                 web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);//获取pv
                 web.WebPv = web.WebPv + 1;
                 web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
@@ -125,26 +121,29 @@ namespace GcStatistics.Sys.Controllers
                 work.CreateRepository<WebInfo>().Update(web);
                 work.Save();
                 List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
-                var model = list.Where(p => p.IC == IC).FirstOrDefault();
-                int id = model.Id;
+                var model = list.Where(p => p.IpAddress == IpAddress).FirstOrDefault();
+                int id = 0; id = model.Id;
                 HttpContext.Current.Session["id"] = id;
 
-                string dateDiff = null;
-                TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
-                TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
-                TimeSpan ts = ts1.Subtract(ts2).Duration();
-                model.Duration = double.Parse(ts.Seconds.ToString());
+                //var id1 = 0;
+                //id1 = int.Parse(HttpContext.Current.Session["id"].ToString());
 
-                work.CreateRepository<VisitorInfo>().Update(model);
-                int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
-                //sum = list.Sum(a => a.Id);
-                double duration = work.CreateRepository<VisitorInfo>().GetCount();
-                duration = list.Sum(a => a.Duration);
-                //平均访问时长
-                web.WebTS = (duration / sum).ToString("0.00");
-                
-                work.CreateRepository<VisitorInfo>().Update(model);
-                work.Save();
+                //string dateDiff = null;
+                //TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
+                //TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
+                //TimeSpan ts = ts1.Subtract(ts2).Duration();
+                //model.Duration = double.Parse(ts.Seconds.ToString());
+
+                //work.CreateRepository<VisitorInfo>().Update(model);
+                //int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
+                ////sum = list.Sum(a => a.Id);
+                //double duration = work.CreateRepository<VisitorInfo>().GetCount();
+                //duration = list.Sum(a => a.Duration);
+                ////平均访问时长
+                //web.WebTS = (duration / sum).ToString("0.00");
+
+                //work.CreateRepository<VisitorInfo>().Update(model);
+                //work.Save();
 
             }
             return new object[] { "持行成功" };
