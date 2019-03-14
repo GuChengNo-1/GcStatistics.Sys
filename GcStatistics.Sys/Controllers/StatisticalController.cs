@@ -92,13 +92,10 @@ namespace GcStatistics.Sys.Controllers
                     int temp = Convert.ToInt32(span.TotalHours);
                     if (temp >= 24 && item.Lock == 0)
                     {
-                        string sql = "update VisitorInfoes set ";
                         item.Lock = 1;
                         work.CreateRepository<VisitorInfo>().Update(item);
                         work.Save();
-                        //item.PageNumber = 0;
                         work.CreateRepository<VisitorInfo>().Insert(vist);
-                        //work.ExecuteNonQuery(sql);
                         work.Save();
                     }
                 }
