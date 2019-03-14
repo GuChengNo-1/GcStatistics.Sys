@@ -51,7 +51,7 @@ namespace GcStatistics.Sys.Models
         /// <summary>
         /// IC 随机生成标识
         /// </summary>
-        //[Key]
+        //[Unique]唯一约束
         public string IC { get; set; }
         /// <summary>
         /// 外键(网站流量表)

@@ -42,9 +42,11 @@ namespace GcStatistics.Sys.Controllers
                 if (se.Contains("MetaSr")) { se = "搜狗"; }
                 //Maxthon浏览器（傲游）
                 if (se.Contains("Maxthon")) { se = "傲游"; }
+                //因特网浏览器
+                else { se = "IE"; }
                 VisitorInfo vist = new VisitorInfo();
                 vist.AccessTime = DateTime.Now;
-                vist.VisitPage = VisitPage; //System.Web.HttpContext.Current.Request.UrlReferrer.ToString()
+                vist.VisitPage = VisitPage;
                 vist.IpAddress = IpAddress;
                 vist.VisitSE = se;
                 vist.WebInfo = web;
@@ -52,24 +54,7 @@ namespace GcStatistics.Sys.Controllers
                 vist.Age = 0;
                 vist.AccessEndTime = DateTime.Now;
 
-                //随机生成标识码(identification code) 32位字符
-                string IC = Guid.NewGuid().ToString("N");
-                var bo = work.CreateRepository<VisitorInfo>().GetList(
-                    m => m.IC == IC);
-                if (bo.Count() > 0)
-                {
-                    IC = Guid.NewGuid().ToString("N");
-                }
-                vist.IC = IC;
-                //bool bo=work.CreateRepository<VisitorInfo>().
-                //vist.IC = IC;
-                //Session传递开始时间  AccessTime
-                DateTime AccessTime = vist.AccessTime;
-                //string aa = HttpContext.Current.Session["AccessTime"].ToString();
-                //HttpContext.Current.Session["Id"] = vist.Id;
-                //work.CreateRepository<VisitorInfo>().Update(vist,AccessTime.ToString());
-                //var time = work.CreateRepository<VisitorInfo>().GetList(m => m.AccessTime == AccessTime); ;
-                //判断用户是否访问一个就退出
+                //判断用户是否访问一个就退出 
                 if (IsPostUrl == string.Empty)
                 {
                     IsPostUrl = VisitPage;
@@ -78,6 +63,22 @@ namespace GcStatistics.Sys.Controllers
                 {
                     vist.PageNumber = 1;
                 }
+                //随机生成标识码(identification code) 32位字符
+                string IC = Guid.NewGuid().ToString("N");
+                var bo = work.CreateRepository<VisitorInfo>().GetList(m => m.IC == IC);
+                if (bo.Count() > 0)
+                {
+                    IC = Guid.NewGuid().ToString("N");
+                }
+                vist.IC = IC;
+
+                //Session传递开始时间  AccessTime
+                //DateTime AccessTime = vist.AccessTime;
+                //string aa = HttpContext.Current.Session["AccessTime"].ToString();
+                //HttpContext.Current.Session["Id"] = vist.Id;
+                //work.CreateRepository<VisitorInfo>().Update(vist,AccessTime.ToString());
+                //var time = work.CreateRepository<VisitorInfo>().GetList(m => m.AccessTime == AccessTime); 
+
                 var alikeCount = work.CreateRepository<VisitorInfo>().GetList(
                     m => m.IpAddress == vist.IpAddress && m.VisitPage == vist.VisitPage
                     );
@@ -88,12 +89,7 @@ namespace GcStatistics.Sys.Controllers
                 {
 
                 }
-
-                #region
-                //1012683c666a4b1ebecf7fb6a2d78ace
-                //41de0d391fb34bb3938c795476f1ee87
-                #endregion
-
+                
                 #endregion
                 web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);//获取pv
                 web.WebPv = web.WebPv + 1;
@@ -113,23 +109,30 @@ namespace GcStatistics.Sys.Controllers
                     }
                 }
                 web.IpCount = webuv.Count;//获取ip数 去重
-
                 work.CreateRepository<WebInfo>().Update(web);
-
                 work.Save();
                 List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
-                var model = list.Where(p => p.AccessTime == AccessTime).FirstOrDefault();
+                var model = list.Where(p => p.IC == IC).FirstOrDefault();
                 int id = model.Id;
+                HttpContext.Current.Session["id"] = id;
 
                 string dateDiff = null;
                 TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
                 TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
                 TimeSpan ts = ts1.Subtract(ts2).Duration();
-                dateDiff = ts.Hours.ToString() + ":" + ts.Minutes.ToString() + ":" + ts.Seconds.ToString();
+                model.Duration = double.Parse(ts.Seconds.ToString());
 
-                double sc =double.Parse(dateDiff) / 5;
+                work.CreateRepository<VisitorInfo>().Update(model);
+                int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
+                //sum = list.Sum(a => a.Id);
+                double duration = work.CreateRepository<VisitorInfo>().GetCount();
+                duration = list.Sum(a => a.Duration);
+                //平均访问时长
+                web.WebTS = (duration / sum).ToString("0.00");
+                
+                work.CreateRepository<VisitorInfo>().Update(model);
+                work.Save();
 
-                HttpContext.Current.Session["id"] = id;
             }
             else
             {

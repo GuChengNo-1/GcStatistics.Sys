@@ -1,5 +1,6 @@
 ﻿using GcStatistics.Sys.Dal;
 using GcStatistics.Sys.Models;
+using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -55,7 +56,7 @@ namespace GcStatistics.Sys
 
         protected void Session_Start()
         {
-
+            Context.Session.Timeout = 1;
         }
         protected void Session_End()
         {
@@ -74,20 +75,20 @@ namespace GcStatistics.Sys
             TimeSpan ts1 = new TimeSpan(startTime.Ticks);
             TimeSpan ts2 = new TimeSpan(endTime.Ticks);
             TimeSpan ts = ts1.Subtract(ts2).Duration();
-            model.Duration =double.Parse(ts.Seconds.ToString());
-            
+            model.Duration = double.Parse(ts.Seconds.ToString());
             work.CreateRepository<VisitorInfo>().Update(model);
             int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
-            //sum = list.Sum(a => a.Id);
+            //list.GroupBy();
             double duration = work.CreateRepository<VisitorInfo>().GetCount();
             duration = list.Sum(a => a.Duration);
-            double sc = duration / sum;
+            //平均时长
+            //double sc = duration / sum;
+            //WebPv.WebTS = duration / sum;
 
-            
             work.CreateRepository<VisitorInfo>().Update(model);
             work.Save();
 
-           
+
 
             //int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
             //sum = list.Sum(a=>a.Id);
