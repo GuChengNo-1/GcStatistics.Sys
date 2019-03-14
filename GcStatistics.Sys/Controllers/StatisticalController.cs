@@ -2,10 +2,11 @@
 using GcStatistics.Sys.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Http;
 
@@ -18,7 +19,6 @@ namespace GcStatistics.Sys.Controllers
     {
         WorkOfUnit work = new WorkOfUnit();
         private static string IsPostUrl = string.Empty;
-        GcSiteDb db = new GcSiteDb();
         public IEnumerable<object> Get(string key, string VisitPage, string IpAddress, string Address)
         {
             WebInfo web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);
@@ -87,7 +87,20 @@ namespace GcStatistics.Sys.Controllers
                 //判断用户是否相同用户
                 if (!(alikeCount.Count() > 0))
                 {
-
+                    TimeSpan span = DateTime.Now - item.AccessTime;
+                    //判断该ip地址访客访问时间是否超过24小时
+                    int temp = Convert.ToInt32(span.TotalHours);
+                    if (temp >= 24 && item.Lock == 0)
+                    {
+                        string sql = "update VisitorInfoes set ";
+                        item.Lock = 1;
+                        work.CreateRepository<VisitorInfo>().Update(item);
+                        work.Save();
+                        //item.PageNumber = 0;
+                        work.CreateRepository<VisitorInfo>().Insert(vist);
+                        //work.ExecuteNonQuery(sql);
+                        work.Save();
+                    }
                 }
                 
                 #endregion
@@ -95,8 +108,8 @@ namespace GcStatistics.Sys.Controllers
                 web.WebPv = web.WebPv + 1;
                 web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
                 int rate = work.CreateRepository<VisitorInfo>().GetCount(m => m.PageNumber == 0);
-                decimal result = Math.Round((decimal)rate / web.WebPv, 4);
-                web.BounceRate = result.ToString();
+                decimal rateResult = Math.Round((decimal)rate / web.WebPv, 4);
+                web.BounceRate = (rateResult * 100).ToString().Length >= 5 ? (rateResult * 100).ToString().Substring(0, 5) + "%" : (rateResult * 100).ToString() + "%";
                 List<VisitorInfo> webuv = work.CreateRepository<VisitorInfo>().GetList().ToList();//获取uv
                 for (int i = 0; i < webuv.Count(); i++)
                 {
@@ -134,24 +147,13 @@ namespace GcStatistics.Sys.Controllers
                 work.Save();
 
             }
-            else
-            {
-
-            }
-
             return new object[] { "持行成功" };
         }
 
         public void Put(int id, [FromBody]WebInfo model)
         {
-            string url = HttpContext.Current.Request.Url.PathAndQuery;
-        }
-        public void Delete(string key)
-        {
-        }
-        public void Update(string key)
-        {
 
         }
+
     }
 }
