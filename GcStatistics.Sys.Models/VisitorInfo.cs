@@ -45,7 +45,7 @@ namespace GcStatistics.Sys.Models
         /// </summary>
         public Double Duration { get; set; }
         /// <summary>
-        /// (0 or 1)用户是否只访问了一个页面
+        /// (0 or 1)访客是否只访问了一个页面
         /// </summary>
         public int PageNumber { get; set; }
         /// <summary>
@@ -53,6 +53,11 @@ namespace GcStatistics.Sys.Models
         /// </summary>
         //[Key]
         public string IC { get; set; }
+        /// <summary>
+        /// 更改访客状态(0 or 1)默认0 
+        /// 超过了24小时后将修改成1
+        /// </summary>
+        public int Lock { get; set; }
         /// <summary>
         /// 外键(网站流量表)
         /// </summary>
