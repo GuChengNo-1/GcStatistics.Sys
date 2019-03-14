@@ -51,7 +51,7 @@ namespace GcStatistics.Sys.Models
         /// <summary>
         /// IC 随机生成标识
         /// </summary>
-        //[Key]
+        //[Unique]唯一约束
         public string IC { get; set; }
         /// <summary>
         /// 更改访客状态(0 or 1)默认0 

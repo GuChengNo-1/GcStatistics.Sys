@@ -43,7 +43,7 @@ namespace GcStatistics.Sys.Controllers
                 //Maxthon浏览器（傲游）
                 if (se.Contains("Maxthon")) { se = "傲游"; }
                 //因特网浏览器
-                else { se = "IE"; }
+                //else { se = "IE"; }
                 VisitorInfo vist = new VisitorInfo();
                 vist.AccessTime = DateTime.Now;
                 vist.VisitPage = VisitPage;
@@ -65,22 +65,19 @@ namespace GcStatistics.Sys.Controllers
                 }
                 //随机生成标识码(identification code) 32位字符
                 string IC = Guid.NewGuid().ToString("N");
-                var bo = work.CreateRepository<VisitorInfo>().GetList(
-                    m => m.IC == IC);
+                var bo = work.CreateRepository<VisitorInfo>().GetList(m => m.IC == IC);
                 if (bo.Count() > 0)
                 {
                     IC = Guid.NewGuid().ToString("N");
                 }
                 vist.IC = IC;
-                //Session传递开始时间  AccessTime
-                DateTime AccessTime = vist.AccessTime;
-                //string aa = HttpContext.Current.Session["AccessTime"]
 
+                //判断用户是否相同用户
                 List<VisitorInfo> alikeCount = work.CreateRepository<VisitorInfo>().GetList(
-                    m => m.IpAddress == vist.IpAddress
-                    ).ToList();
+                 m => m.IpAddress == vist.IpAddress
+                 ).ToList();
                 //通过ip地址保证访客数计算
-                if (alikeCount == null)
+                if (alikeCount.Count() == 0)
                 {
                     work.CreateRepository<VisitorInfo>().Insert(vist);
                     work.Save();
@@ -99,11 +96,10 @@ namespace GcStatistics.Sys.Controllers
                         work.Save();
                     }
                 }
+
+
                 #endregion
 
-                var modelList = work.CreateRepository<VisitorInfo>().GetList(p => p.IC == vist.IC).FirstOrDefault();
-                int id = modelList == null ? 0 : modelList.Id;
-                HttpContext.Current.Session["id"] = id;
                 web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);//获取pv
                 web.WebPv = web.WebPv + 1;
                 web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
@@ -124,6 +120,31 @@ namespace GcStatistics.Sys.Controllers
                 web.IpCount = webuv.Count;//获取ip数 去重
                 work.CreateRepository<WebInfo>().Update(web);
                 work.Save();
+                List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
+                var model = list.Where(p => p.IpAddress == IpAddress).FirstOrDefault();
+                int id = 0; id = model.Id;
+                HttpContext.Current.Session["id"] = id;
+
+                //var id1 = 0;
+                //id1 = int.Parse(HttpContext.Current.Session["id"].ToString());
+
+                //string dateDiff = null;
+                //TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
+                //TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
+                //TimeSpan ts = ts1.Subtract(ts2).Duration();
+                //model.Duration = double.Parse(ts.Seconds.ToString());
+
+                //work.CreateRepository<VisitorInfo>().Update(model);
+                //int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
+                ////sum = list.Sum(a => a.Id);
+                //double duration = work.CreateRepository<VisitorInfo>().GetCount();
+                //duration = list.Sum(a => a.Duration);
+                ////平均访问时长
+                //web.WebTS = (duration / sum).ToString("0.00");
+
+                //work.CreateRepository<VisitorInfo>().Update(model);
+                //work.Save();
+
             }
             return new object[] { "持行成功" };
         }
