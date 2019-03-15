@@ -1,4 +1,5 @@
-﻿using GcStatistics.Sys.Dal;
+﻿using GcStatistics.Sys.App_Start;
+using GcStatistics.Sys.Dal;
 using GcStatistics.Sys.Models;
 using Microsoft.Ajax.Utilities;
 using System;
@@ -18,11 +19,12 @@ namespace GcStatistics.Sys
     public class WebApiApplication : System.Web.HttpApplication, System.Web.SessionState.IRequiresSessionState
     {
         WorkOfUnit work = new WorkOfUnit();
-        GcSiteDb db = new GcSiteDb();
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            //启用异常过滤
+            //GlobalConfiguration.Configuration.Filters.Add(new WebApiExceptionFilterAttribute());
             //删除数据库重新创建数据库
             //Database.SetInitializer(new DropCreateDatabaseIfModelChanges<GcSiteDb>());
             //当models发生改变时修改数据库
@@ -63,35 +65,49 @@ namespace GcStatistics.Sys
             DateTime startTime, endTime;
             //接受后台传递的Id
             var id = 0;
-            id = int.Parse(Session["id"].ToString());
+            try
+            {
+                id = Session["id"].ToString() == null ? 0 : int.Parse(Session["id"].ToString());
+                if (id != 0)
+                {
+                    List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
+                    var model = list.Where(p => p.Id == int.Parse(id.ToString())).FirstOrDefault();
+                    int vid = 0;
+                    vid = model.Id;
+                    startTime = model.AccessTime;
+                    model.AccessEndTime = DateTime.Now;
+                    endTime = model.AccessEndTime;
 
-            //id = int.Parse(HttpContext.Current.Session["id"].ToString());
+                    string dateDiff = null;
+                    TimeSpan ts1 = new TimeSpan(startTime.Ticks);
+                    TimeSpan ts2 = new TimeSpan(endTime.Ticks);
+                    TimeSpan ts = ts1.Subtract(ts2).Duration();
 
+                    string aa = ts.ToString();
+                    string H = aa.Split(':')[0].ToString();
+                    string M = aa.Split(':')[1].ToString();
+                    string S = aa.Split(':')[2].ToString();
+                    Double Duration = Double.Parse(H) * 3600 + Double.Parse(M) * 60 + Double.Parse(S);
+                    model.Duration = Duration;
 
-            List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
-            var model = list.Where(p => p.Id == int.Parse(id.ToString())).FirstOrDefault();
-            int vid = 0;
-            vid = model.Id;
-            startTime = model.AccessTime;
-            model.AccessEndTime = DateTime.Now;
-            endTime = model.AccessEndTime;
-
-            string dateDiff = null;
-            TimeSpan ts1 = new TimeSpan(startTime.Ticks);
-            TimeSpan ts2 = new TimeSpan(endTime.Ticks);
-            TimeSpan ts = ts1.Subtract(ts2).Duration();
-            model.Duration = double.Parse(ts.Seconds.ToString());
-            work.CreateRepository<VisitorInfo>().Update(model);
-            int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
-            //list.GroupBy();
-            double duration = work.CreateRepository<VisitorInfo>().GetCount();
-            duration = list.Sum(a => a.Duration);
-            //平均时长
-            //double sc = duration / sum;
-            //WebPv.WebTS = d         uration / sum;
-
-            work.CreateRepository<VisitorInfo>().Update(model);
-            work.Save();
+                    work.CreateRepository<VisitorInfo>().Update(model);
+                    int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
+                    //list.GroupBy();
+                    double duration = work.CreateRepository<VisitorInfo>().GetCount();
+                    duration = list.Sum(a => a.Duration);
+                    //平均时长
+                    double sc = duration / sum;
+                    var web = work.CreateRepository<WebInfo>().GetList(m => m.Id == model.WebInfo.Id).FirstOrDefault();
+                    web.WebTS = sc.ToString();
+                    work.CreateRepository<WebInfo>().Update(web);
+                    work.Save();
+                }
+            }
+            catch (Exception ex)
+            {
+                return;
+                throw ex;
+            }
         }
     }
 }
