@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GcStatistics.Sys.App_Start;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Formatting;
@@ -31,7 +32,10 @@ namespace GcStatistics.Sys
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+            //跨域配置
             config.EnableCors();
+            //启用异常过滤
+            //config.Filters.Add(new WebApiExceptionFilterAttribute());
         }
     }
 }

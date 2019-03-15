@@ -48,5 +48,6 @@ namespace GcStatistics.Sys.Models
         /// </summary>
         public virtual UserInfo UserInfo { get; set; }
         public virtual ICollection<VisitorInfo> VisitorInfo { get; set; }
+        public virtual ICollection<FlowComputer> Flow { get; set; }
     }
 }

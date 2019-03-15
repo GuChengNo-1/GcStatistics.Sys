@@ -1,4 +1,5 @@
-﻿using GcStatistics.Sys.Dal;
+﻿using GcStatistics.Sys.App_Start;
+using GcStatistics.Sys.Dal;
 using GcStatistics.Sys.Models;
 using Microsoft.Ajax.Utilities;
 using System;
@@ -18,11 +19,12 @@ namespace GcStatistics.Sys
     public class WebApiApplication : System.Web.HttpApplication, System.Web.SessionState.IRequiresSessionState
     {
         WorkOfUnit work = new WorkOfUnit();
-        GcSiteDb db = new GcSiteDb();
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            //启用异常过滤
+            //GlobalConfiguration.Configuration.Filters.Add(new WebApiExceptionFilterAttribute());
             //删除数据库重新创建数据库
             //Database.SetInitializer(new DropCreateDatabaseIfModelChanges<GcSiteDb>());
             //当models发生改变时修改数据库
