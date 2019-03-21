@@ -60,54 +60,39 @@ namespace GcStatistics.Sys.Controllers
                     vist.Age = 0;
                     vist.AccessEndTime = DateTime.Now;
 
-                //判断用户是否相同用户
-                List<VisitorInfo> alikeCount = work.CreateRepository<VisitorInfo>().GetList(
-                 m => m.IpAddress == vist.IpAddress
-                 ).ToList();
-                work.CreateRepository<VisitorInfo>().Insert(vist);
-                work.Save();
-                //通过ip地址保证访客数计算
-                if (alikeCount.Count() == 0)
-                {
-                    work.CreateRepository<VisitorInfo>().Insert(vist);
-                    work.Save();
-                    List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
-                    var model = list.Where(p => p.IC == IC).FirstOrDefault();
-                    int id = 0; id = model.Id;
-                    HttpContext.Current.Session["id"] = id;
-                }
-                else
-                {
-                    foreach (var item in alikeCount)
+                    //判断用户是否访问一个就退出 
+                    if (IsPostUrl == string.Empty)
                     {
-                        TimeSpan span = DateTime.Now - item.AccessEndTime;
-                        //判断该ip地址访客访问时间是否超过24小时
-                        int temp = Convert.ToInt32(span.TotalHours);
-                        if (temp >= 24 && item.Lock == 0)
-                        {
-                            item.Lock = 1;
-                            work.CreateRepository<VisitorInfo>().Update(item);
-                            work.Save();
-                            work.CreateRepository<VisitorInfo>().Insert(vist);
-                            work.Save();
-                            List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
-                            var model = list.Where(p => p.IC == IC).FirstOrDefault();
-                            int id = 0; id = model.Id;
-                            HttpContext.Current.Session["id"] = id;
-                        }
+                        IsPostUrl = VisitPage;
                     }
-                }
-                #endregion
-                web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);//获取pv
-                web.WebPv = web.WebPv + 1;
-                web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
-                int rate = work.CreateRepository<VisitorInfo>().GetCount(m => m.PageNumber == 0);
-                decimal rateResult = Math.Round((decimal)rate / web.WebPv, 4);
-                web.BounceRate = (rateResult * 100).ToString().Length >= 5 ? (rateResult * 100).ToString().Substring(0, 5) + "%" : (rateResult * 100).ToString() + "%";
-                List<VisitorInfo> webuv = work.CreateRepository<VisitorInfo>().GetList().ToList();//获取uv
-                for (int i = 0; i < webuv.Count(); i++)
-                {
-                    for (int j = webuv.Count() - 1; j > i; j--)
+                    if (IsPostUrl != VisitPage)
+                    {
+                        vist.PageNumber = 1;
+                    }
+                    //随机生成标识码(identification code) 32位字符
+                    string IC = Guid.NewGuid().ToString("N");
+                    var bo = work.CreateRepository<VisitorInfo>().GetList(m => m.IC == IC);
+                    if (bo.Count() > 0)
+                    {
+                        IC = Guid.NewGuid().ToString("N");
+                    }
+                    vist.IC = IC;
+
+                    //判断用户是否相同用户
+                    List<VisitorInfo> alikeCount = work.CreateRepository<VisitorInfo>().GetList(
+                     m => m.IpAddress == vist.IpAddress
+                     ).ToList();
+                    //通过ip地址保证访客数计算
+                    if (alikeCount.Count() == 0)
+                    {
+                        work.CreateRepository<VisitorInfo>().Insert(vist);
+                        work.Save();
+                        List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
+                        var model = list.Where(p => p.IC == IC).FirstOrDefault();
+                        int id = 0; id = model.Id;
+                        HttpContext.Current.Session["id"] = id;
+                    }
+                    else
                     {
                         foreach (var item in alikeCount)
                         {
@@ -128,24 +113,8 @@ namespace GcStatistics.Sys.Controllers
                             }
                         }
                     }
-                }
-                web.IpCount = webuv.Count;//获取ip数 去重
-                work.CreateRepository<WebInfo>().Update(web);
-                work.Save();
-                //List<VisitorInfo> list = work.CreateRepository<VisitorInfo>().GetList().ToList();
-                //var model = list.Where(p => p.IC == IC).FirstOrDefault();
-                //int id = 0; id = model.Id;
-                //HttpContext.Current.Session["id"] = id;
 
-
-
-                //var id1 = 0;
-                //id1 = int.Parse(HttpContext.Current.Session["id"].ToString());
-                //string dateDiff = null;
-                //TimeSpan ts1 = new TimeSpan(model.AccessTime.Ticks);
-                //TimeSpan ts2 = new TimeSpan(model.AccessEndTime.Ticks);
-                //TimeSpan ts = ts1.Subtract(ts2).Duration();
-                //model.Duration = double.Parse(ts.Seconds.ToString());
+                    #endregion
 
                     #region 获取PV信息&添加PV信息
                     FlowComputer flow = new FlowComputer();

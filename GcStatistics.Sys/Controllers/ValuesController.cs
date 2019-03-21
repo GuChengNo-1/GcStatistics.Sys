@@ -35,8 +35,8 @@ namespace GcStatistics.Sys.Controllers
                 //获取访问总量
                 work.Save();
                 //获取本机ip地址
-                string pcName = System.Net.Dns.GetHostName();
-                ip = Dns.Resolve(pcName).AddressList;
+                //string pcName = System.Net.Dns.GetHostName();
+                //ip = Dns.Resolve(pcName).AddressList;
             }
 
             return ip[0].ToString();

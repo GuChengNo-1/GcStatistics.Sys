@@ -75,7 +75,6 @@ namespace GcStatistics.Sys
                 startTime = model.AccessTime;
                 model.AccessEndTime = DateTime.Now;
                 endTime = model.AccessEndTime;
-                string dateDiff = null;
                 TimeSpan ts1 = new TimeSpan(startTime.Ticks);
                 TimeSpan ts2 = new TimeSpan(endTime.Ticks);
                 TimeSpan ts = ts1.Subtract(ts2).Duration();
@@ -87,7 +86,6 @@ namespace GcStatistics.Sys
                 model.Duration = Duration;
                 work.CreateRepository<VisitorInfo>().Update(model);
                 int sum = work.CreateRepository<VisitorInfo>().GetCount(m => m.Id != 0);
-                //list.GroupBy();
                 double duration = work.CreateRepository<VisitorInfo>().GetCount();
                 duration = list.Sum(a => a.Duration);
                 work.CreateRepository<VisitorInfo>().Update(model);
