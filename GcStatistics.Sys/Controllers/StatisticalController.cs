@@ -1,4 +1,5 @@
 ﻿using GcStatistics.Sys.App_Start;
+using GcStatistics.Sys.Common;
 using GcStatistics.Sys.Dal;
 using GcStatistics.Sys.Models;
 using System;
@@ -19,6 +20,7 @@ namespace GcStatistics.Sys.Controllers
     public class StatisticalController : ApiController
     {
         WorkOfUnit work = new WorkOfUnit();
+        SearchKeyword searchkey = new SearchKeyword();
         private static string IsPostUrl = string.Empty;
 
         public IEnumerable<object> Get(string key, string VisitPage, string IpAddress, string Address)
@@ -117,16 +119,28 @@ namespace GcStatistics.Sys.Controllers
                     #region 获取PV信息&添加PV信息
                     FlowComputer flow = new FlowComputer();
                     flow.VisitPage = VisitPage;
-                    flow.VisitSE = vist.VisitSE;
                     flow.WebHost = System.Web.HttpContext.Current.Request.Url.Host.ToString();
-                    flow.SearchTerms = "";
+                    string str = HttpContext.Current.Request.UrlReferrer.ToString();
+                    //判断是否搜索引擎链接
+                    if (searchkey.IsSearchEnginesGet(str))
+                    {
+                        //取得搜索关键字
+                        flow.SearchTerms = searchkey.SearchKey(str);
+                        //取得搜索引擎名称
+                        flow.VisitSE = searchkey.EngineName;
+                    }
+                    else
+                    {
+                        flow.SearchTerms = "其他";
+                        flow.VisitSE = vist.VisitSE;
+                    }
                     flow.CurrentTime = DateTime.Now;
                     flow.WebInfo = web;
                     lock (flow)
                     {
                         work.CreateRepository<FlowComputer>().Insert(flow);
                         work.Save();
-                    } 
+                    }
                     #endregion
 
                     //web = work.CreateRepository<WebInfo>().GetFirst(m => m.WebKey == key);//获取pv
@@ -134,6 +148,7 @@ namespace GcStatistics.Sys.Controllers
                     web.WebUv = work.CreateRepository<VisitorInfo>().GetCount(m => m.WebInfo.Id == web.Id);
                     int rate = work.CreateRepository<VisitorInfo>().GetCount(m => m.PageNumber == 0);
                     decimal rateResult = Math.Round((decimal)rate / web.WebPv, 4);
+                    if (rateResult >= 1) { rateResult = 1; }
                     web.BounceRate = (rateResult * 100).ToString().Length >= 5 ? (rateResult * 100).ToString().Substring(0, 4) + "%" : (rateResult * 100).ToString() + "%";
                     List<VisitorInfo> webuv = work.CreateRepository<VisitorInfo>().GetList().ToList();//获取uv
                     for (int i = 0; i < webuv.Count(); i++)
@@ -177,6 +192,21 @@ namespace GcStatistics.Sys.Controllers
             }
             return new object[] { "持行成功" };
         }
+        public string GetQueryString(string name)
+        {
+            var index = HttpContext.Current.Request.UrlReferrer.Query.IndexOf(name + "=");
+            string e = string.Empty;
+            if (index > 1)
+            {
+                e = HttpContext.Current.Request.UrlReferrer.Query.Substring(index + name.Length + 1);
+                if ((index = e.IndexOf("&")) > 0)
+                {
+                    e = e.Substring(0, index);
+                }
+            }
+            return e;
+        }
+
 
         public void Put(int id, [FromBody]WebInfo model)
         {
